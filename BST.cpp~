@@ -1,0 +1,8 @@
+#include "BST.h"
+
+using namespace std;
+
+Binary_tree::Binary_tree() {
+  root = NULL;
+  cout << "Tree initialized" << endl;
+}
