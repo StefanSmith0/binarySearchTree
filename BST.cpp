@@ -15,27 +15,81 @@ void Binary_tree::insert(int newInt) {
   insertNode(root, newNode);
 }
 
-void Binary_tree::findNode(int & searchValue, node* & current, node* & prev) {
-  if(current) {
-    if(current->value == searchValue) {
-      
-      return;
+node* Binary_tree::findPreviousNode(int & searchValue, node* & result, node* & prevResult) {
+  if(result) {
+    if(result->value == searchValue) {
+      return prevResult;
     }
-    else if(current->value > searchValue) {
-      findNode(searchValue, current->lchild, current);
+    else if(result->value > searchValue) {
+      return findPreviousNode(searchValue, result->lchild, result);
     }
     else {
-      findNode(searchValue, current->rchild, current);
+      return findPreviousNode(searchValue, result->rchild, result);
     }
   }
+  else {
+    return nullptr;
+  }
+}
+
+void Binary_tree::findNode(int& searchValue, node*& result, node*& prevResult) {
+  prevResult = findPreviousNode(searchValue, result, prevResult);
+  if(prevResult) {
+    if(prevResult->lchild->value == searchValue) {
+      result = prevResult->lchild;
+    }
+    else {
+      result = prevResult->rchild;
+    }
+  }
+}
+
+bool Binary_tree::islchild(node* child, node* parent) {
+  if(parent->lchild->value == child->value) {
+    return true;
+  }
+  return false;
 }
 
 void Binary_tree::remove(int deleteValue) {
   node* result = root;
   node* prevResult = root;
   findNode(deleteValue, result, prevResult);
-  cout << result->value << endl;
-  cout << prevResult->value << endl;
+  bool lchild = islchild(result, prevResult);
+  if(!result->lchild && !result->rchild) { //leaf
+    if(lchild) {
+      prevResult->lchild = nullptr;
+      delete result;
+    }
+  }
+  else if(result->lchild && result->rchild) { //two children
+    node* replacement = result->rchild;
+    node* replacementL = replacement->lchild;
+    while(replacementL != nullptr) {
+      replacement = replacementL;
+      replacementL = replacement->lchild;
+    }
+    int replacementValue = replacement->value;
+    cout << "sawg" << replacementValue << endl;
+    remove(replacementValue);
+    result->value = replacement->value;
+  }
+  else if(result->lchild || result->rchild) { //one child
+    node* child;
+    if(result->lchild) {
+      child = result->lchild;
+    }
+    else {
+      child = result->rchild;
+    }
+    if(lchild) {
+      prevResult->lchild = child;
+    }
+    else {
+      prevResult->rchild = child;
+    }
+    delete result;
+  }
 }
 
 void Binary_tree::insertNode(node* & root, node* & newNode) {

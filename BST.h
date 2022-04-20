@@ -23,7 +23,9 @@ class Binary_tree {
   node* root;
   void insertNode(node*&, node*&);
   void displayTree(bool, node*, const string&);
+  node* findPreviousNode(int&, node*&, node*&);
   void findNode(int&, node*&, node*&);
+  bool islchild(node*, node*);
 };
 
 

@@ -15,5 +15,7 @@ int main() {
   cout << "Choose a number to remove: ";
   cin >> input;
   bst->remove(input);
+
+  bst->display();
   return 0;
 }
