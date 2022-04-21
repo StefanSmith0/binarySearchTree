@@ -2,11 +2,27 @@
 
 using namespace std;
 
+//Constructor
 Binary_tree::Binary_tree() {
   root = NULL;
-  cout << "Tree initialized" << endl;
 }
 
+//Destructor
+Binary_tree::~Binary_tree() {
+  destroy(root);
+}
+
+//Deletes every node in the tree
+void Binary_tree::destroy(node* & root) {
+  if(root) {
+    destroy(root->lchild);
+    destroy(root->rchild);
+    delete root;
+    root = nullptr;
+  }
+}
+
+//Adds a value to tree
 void Binary_tree::insert(int newInt) {
   node* newNode = new node();
   newNode->value = newInt;
@@ -15,10 +31,23 @@ void Binary_tree::insert(int newInt) {
   insertNode(root, newNode);
 }
 
+//Searches for a value in tree
+bool Binary_tree::search(int searchValue) {
+  node* result = root;
+  node* prevResult = root;
+  findNode(searchValue, result, prevResult);
+  if(result) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+//Finds the parent of a node with a given value
 node* Binary_tree::findPreviousNode(int searchValue, node* result, node* prevResult) {
   if(result) {
     if(result->value == searchValue) {
-      cout << "findPreviousNode - prevResult is: " << prevResult->value << endl;
       return prevResult;
     }
     else if(result->value > searchValue) {
@@ -33,28 +62,26 @@ node* Binary_tree::findPreviousNode(int searchValue, node* result, node* prevRes
   }
 }
 
+//Uses findPreviousNode to find a node with a given value
 void Binary_tree::findNode(int & searchValue, node* & result, node* & prevResult) {
   prevResult = findPreviousNode(searchValue, result, prevResult);
   if(prevResult) {
-    cout << "findNode - prevResult is: " << prevResult->value << ", finding result..." << endl;
-    if(prevResult->lchild->value == searchValue) {
-      cout << "findNode - Result is lchild of prevResult" << endl;
+    if(prevResult->lchild && prevResult->lchild->value == searchValue) {
       result = prevResult->lchild;
     }
-    else if(prevResult->rchild->value == searchValue) {
-      cout << "findNode - Result is rchild of prevResult" << endl;
+    else if(prevResult->rchild && prevResult->rchild->value == searchValue) {
       result = prevResult->rchild;
     }
     else {
-      cout << "findNode - couldn't find result from prevResult, returning root..." << endl;
       result = root;
     }
   }
   else {
-    cout << "findNode - What the fuck" << endl;
+    result = nullptr;
   }
 }
 
+//Checks if a node is an lchild of another node
 bool Binary_tree::islchild(node* child, node* parent) {
   if(parent->lchild->value == child->value) {
     return true;
@@ -62,11 +89,15 @@ bool Binary_tree::islchild(node* child, node* parent) {
   return false;
 }
 
+//Deletes a node from the tree with a given value
 void Binary_tree::remove(int deleteValue) {
   node* result = root;
   node* prevResult = root;
   findNode(deleteValue, result, prevResult);
-  cout << "remove - Target locked: " << result->value << endl;
+  if(!result) {
+    cout << "Couldn't find " << deleteValue << " in tree." << endl;
+    return;
+  }
   bool lchild = islchild(result, prevResult);
   if(!result->lchild && !result->rchild) { //leaf
     if(lchild) {
@@ -75,25 +106,17 @@ void Binary_tree::remove(int deleteValue) {
     }
   }
   else if(result->lchild && result->rchild) { //two children
-    cout << "remove - Node has two children." << endl;
-    node* replacementParent = result->rchild;
-    node* replacement = replacementParent->lchild;
-    cout << "remove - Finding leftmost of right substree..." << endl;
-    if(replacement) {
-      while(replacement->lchild) { //find leftmost of right subtree
-	replacementParent = replacement;
-	replacement = replacementParent->lchild;
-      }
-      cout << "remove - replacementParent is: " << replacementParent->value << endl;
-      cout << "remove - replacement is: " << replacement->value << endl;
+    node* replacementParent = result;
+    node* replacement = replacementParent->rchild;
+    while(replacement->lchild) { //loop to find leftmost of right subtree
+      replacementParent = replacement;
+      replacement = replacementParent->lchild;
     }
-    cout << "Last left of right found: " << replacement->value << ", swapping value to: " << result->value << endl;
-    if(replacement->rchild) {
+    if(replacement->rchild) { //if replacement has rchild, adopt it
       if(replacementParent == result) {
 	replacementParent->rchild = replacement->rchild;
       }
       else {
-	cout << "remove - replacement has rchild, moving rchild upward..." << endl;
 	replacementParent->lchild = replacement->rchild;
       }
     }
@@ -108,7 +131,6 @@ void Binary_tree::remove(int deleteValue) {
     int replacementValue = replacement->value;
     delete replacement;
     result->value = replacementValue;
-    cout << "remove - Success" << endl;
   }
   else if(result->lchild || result->rchild) { //one child
     node* child;
@@ -128,6 +150,7 @@ void Binary_tree::remove(int deleteValue) {
   }
 }
 
+//Puts a new node into the tree at the right place
 void Binary_tree::insertNode(node* & root, node* & newNode) {
   if(!root) {
     root = newNode;
@@ -140,12 +163,17 @@ void Binary_tree::insertNode(node* & root, node* & newNode) {
   }
 }
 
+//Runs displayTree
 void Binary_tree::display() {
   string prefix = "";
   displayTree(false, root, prefix);
   cout << endl;
+  cout << "Inorder: ";
+  inorder(root);
+  cout << endl;
 }
 
+//Prints the tree in order
 void Binary_tree::inorder(node* & root) {
   if(root) {
     inorder(root->lchild);
