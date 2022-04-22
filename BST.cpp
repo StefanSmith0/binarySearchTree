@@ -102,8 +102,11 @@ void Binary_tree::remove(int deleteValue) {
   if(!result->lchild && !result->rchild) { //leaf
     if(lchild) {
       prevResult->lchild = nullptr;
-      delete result;
     }
+    else {
+      prevResult->rchild = nullptr;
+    }
+    delete result;
   }
   else if(result->lchild && result->rchild) { //two children
     node* replacementParent = result;
